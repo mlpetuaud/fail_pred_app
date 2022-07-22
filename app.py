@@ -7,6 +7,7 @@ import base64
 import streamlit as st
 
 import users
+import get_env_variables
 
 # lien à faire avec FastAPI
 # http://127.0.0.1:8000 is endpoint from fastapi
@@ -67,7 +68,7 @@ def show_prediction_page():
         if submitted:
             payload = {"dettes":dettes,"statut":statut,"APE":ape}
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
-            response = requests.post("http://127.0.0.1:8000/predict", headers=headers, json=payload)
+            response = requests.post(get_env_variables.API_URL, headers=headers, json=payload)
             result = response.json()
             if result['pred'] == 'wont fail':
                 st.subheader("Prediction : Won't fail")

@@ -1,5 +1,5 @@
 import pandas as pd
-import db_settings
+import get_env_variables
 import sqlalchemy
 import bcrypt
 
@@ -28,7 +28,7 @@ def add_user(username, password):
         password (string): password in plain text
     """
     hashed_password = hash_password(password)
-    engine = sqlalchemy.create_engine(db_settings.DATABASE_URI, echo=True)
+    engine = sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
     engine.execute(f"""INSERT INTO users (username, password) VALUES ('{username}', '{hashed_password}');""")
     #engine.execute('INSERT INTO users(username, password) VALUES (?,?)', (username, hashed_password))
 # TODO : prevent from SQL Injection 
@@ -43,7 +43,7 @@ def check_user_already_exists(username):
     Returns:
         Bool: True if user already exists, else False
     """
-    engine =  sqlalchemy.create_engine(db_settings.DATABASE_URI, echo=True)
+    engine =  sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
     result = engine.execute(f"SELECT username from users WHERE username = '{username}'")
     result_list = [r[0] for r in result]
     result = (len(result_list) != 0)
@@ -64,7 +64,7 @@ def check_password(username, password):
         (the one stored into the database for this username)
         False if it is not or if user name not found.
     """
-    engine = sqlalchemy.create_engine(db_settings.DATABASE_URI, echo=True)
+    engine = sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
     # retrieve db password
     result = engine.execute(f"SELECT password from users WHERE username = '{username}'")
     try:
