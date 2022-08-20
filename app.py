@@ -1,4 +1,3 @@
-
 import requests
 import pandas as pd
 import json
@@ -8,12 +7,13 @@ import streamlit as st
 
 import users
 import get_env_variables
+from prepare_data import prepare_input
 
-# lien à faire avec FastAPI
-# http://127.0.0.1:8000 is endpoint from fastapi
-#response = requests.post("http://127.0.0.1:8000/predict")
-#st.write(response)
+"""This file holds the main file of a Streamlit app used to predict company failure probability
+"""
 
+# ---- PAGE SETTINGS ----
+st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="centered", initial_sidebar_state="collapsed", menu_items=None)
 
 # ---- CONTAINERS DECLARATION ----
 header_section = st.container()
@@ -22,26 +22,6 @@ login_section = st.expander("LOG IN")
 logout_section = st.sidebar.container()
 signup_section = st.expander("SIGN UP")
 
-
-# ---- UTILS ----
-# from https://levelup.gitconnected.com/how-to-add-a-background-image-to-your-streamlit-app-96001e0377b2
-
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background-image: url(data:image/{"jpg"};base64,{encoded_string.decode()});
-        background-size: cover
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-    )
-
-
 # ---- PREDICTION ----
 def show_prediction_page():
     """This functions shows prediction page :
@@ -49,35 +29,43 @@ def show_prediction_page():
             - API call
             - prediction output
     """
-    st.header("PREDICTION ZONE")
-    form_col, output_col = st.columns(2)
-    # input form
-    with form_col:
-        with st.form(key="input form"):
-            st.subheader('Select values for features :')
-            dettes = st.slider("Dettes")
-            statut = st.selectbox(
-                'Quel statut ?', 
-                ('Société à responsabilité limitée (SARL)', 'Société par actions simplifiée', "Société anonyme à conseil d'administration", "Entrepreneur individuel"))
-            ape = st.selectbox(
-                'Quel secteur ?', 
-                ('A', 'B', 'C', 'D', 'E' 'F', 'G'))
-            submitted = st.form_submit_button("Submit")
-    # prediction output
-    with output_col:
+    #prediction input
+    st.header("SELECTIONNEZ UNE ENTREPRISE :")
+    with st.form(key="input form"):
+            company = st.selectbox(
+                'Quelle entreprise ?', 
+                ("La Dolce Data", "Walking Bread", "World Company", "Tech tonique"))
+            submitted = st.form_submit_button("Soumettre")
+
+    #prediction output
+    with st.container():
         if submitted:
-            payload = {"dettes":dettes,"statut":statut,"APE":ape}
-            headers = {"Content-Type": "application/json", "Accept": "application/json"}
-            response = requests.post(get_env_variables.API_URL, headers=headers, json=payload)
-            result = response.json()
-            if result['pred'] == 'wont fail':
-                st.subheader("Prediction : Won't fail")
-                st.image("001-yes.png")
-                st.caption(f"failure probability : {round(result['failure_proba']*100, 2)}%")
-            else:
-                st.subheader("Prediction : Will fail")
-                st.image("003-no.png")
-                st.caption(f"failure probability : {round(result['failure_proba']*100, 2)}%")
+            # load json file holding features for each choice
+            data = json.load(open("data.json"))
+
+            # create 2 tabs to display results
+            tab1, tab2 = st.tabs([" 🔮 Prédiction", " 📓 Données détaillées"])
+
+            # tab1 holds prediction
+            with tab1:
+                payload_2 = data[company]
+                headers = {"Content-Type": "application/json", "Accept": "application/json"}
+                response = requests.post(get_env_variables.API_URL, headers=headers, json=payload_2)
+                result = response.json()
+                if result['pred'] == 'wont fail':
+                    st.header("Prédiction : PROSPERITE")
+                    st.image("001-yes.png", width=80)
+                    st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
+                else:
+                    st.header("Prédiction : FAILLITE")
+                    st.image("003-no.png", width=80)
+                    st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
+            # tab2 displays the input data
+            with tab2:
+                st.header("Données détaillées")
+                df = prepare_input(data[company])
+                df = df.rename(columns={0:company})
+                st.write(df)
 
 
 # ---- USER AUTHENTIFICATION ----
