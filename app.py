@@ -9,11 +9,9 @@ import users
 import get_env_variables
 from prepare_data import prepare_input
 
-"""This file holds the main file of a Streamlit app used to predict company failure probability
-"""
 
 # ---- PAGE SETTINGS ----
-#st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="centered", initial_sidebar_state="collapsed", menu_items=None)
+st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="centered", initial_sidebar_state="collapsed", menu_items=None)
 
 # ---- CONTAINERS DECLARATION ----
 header_section = st.container()
