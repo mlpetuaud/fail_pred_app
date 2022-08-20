@@ -11,14 +11,14 @@ from prepare_data import prepare_input
 
 
 # ---- PAGE SETTINGS ----
-st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="centered", initial_sidebar_state="collapsed", menu_items=None)
+st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="centered", initial_sidebar_state="auto", menu_items=None)
 
 # ---- CONTAINERS DECLARATION ----
 header_section = st.container()
 main_section = st.container()
-login_section = st.expander("LOG IN")
+login_section = st.expander("SE CONNECTER")
 logout_section = st.sidebar.container()
-signup_section = st.expander("SIGN UP")
+signup_section = st.expander("CREER UN COMPTE")
 
 # ---- PREDICTION ----
 def show_prediction_page():
@@ -82,14 +82,14 @@ def show_logout_page():
             with col1:
                 st.image("005-user.png")
             with col2:
-                st.subheader(f"Logged as {st.session_state['username']}")
+                st.subheader(f"Connecté en tant que {st.session_state['username']}")
             with col3:
                 st.write("")
         col4, col5, col6 = st.columns(3)
         with col4:
             st.write("")
         with col5:
-            st.button("Log Out", key="logout", on_click=logged_out_clicked)
+            st.button("Se déconnecter", key="logout", on_click=logged_out_clicked)
         
 def logged_in_clicked(username, password):
     """This function uses the users module to check if password 
@@ -110,7 +110,7 @@ def logged_in_clicked(username, password):
         st.session_state['username'] = username
     else:
         st.session_state['logged_in'] = False
-        st.error("Invalid user name or password")
+        st.error("Problème d'identification : vérifiez nom d'utilisateur et mot de passe")
 
 def signup_clicked(username, password):
     """This functions allows a new user to create an account. 
@@ -125,11 +125,11 @@ def signup_clicked(username, password):
     if not users.check_user_already_exists(username):
         st.session_state['logged_in'] = True
         users.add_user(username, password)
-        st.success("You have successfully created your account")
+        st.success("Compte créé avec succès")
         st.session_state['username'] = username
     else:
         st.session_state['logged_in'] = False
-        st.error("This user name does already exist. Please choose another one")
+        st.error("Ce nom d'utilisateur existe déjà, merci d'en définir un autre")
 
 def show_authentification_page():
     """This function shows the landing page of app, composed by 2 expanders
@@ -137,16 +137,16 @@ def show_authentification_page():
     """
     with login_section:
         if st.session_state['logged_in'] == False:
-            st.subheader("Login section")
-            username_login = st.text_input("User Name", key="user_login", value="")
-            password_login = st.text_input("Password", type="password", value="")
-            st.button("Login", on_click=logged_in_clicked, args= (username_login, password_login))
+            st.subheader("Se connecter")
+            username_login = st.text_input("Utilisateur", key="user_login", value="")
+            password_login = st.text_input("Mot de passe", type="password", value="")
+            st.button("Connexion", on_click=logged_in_clicked, args= (username_login, password_login))
     with signup_section:
         if st.session_state['logged_in'] == False:
-            st.subheader("Create a new account")
-            username_signup = st.text_input("User Name", key="user_signup", value="")
-            password_signup = st.text_input("Choose a password", type="password", value="")
-            st.button("Sign Up", on_click=signup_clicked, args=(username_signup, password_signup))
+            st.subheader("Créer un compte")
+            username_signup = st.text_input("Choisir un nom d'utilisateur", key="user_signup", value="")
+            password_signup = st.text_input("Choisir un mot de passe", type="password", value="")
+            st.button("Nouveau compte", on_click=signup_clicked, args=(username_signup, password_signup))
 
 
 # ---- MAIN ----
@@ -155,7 +155,7 @@ with header_section:
     with img_col:
         st.image("crash-1.jpg")
     with title_col:
-        st.title("Is this company likely to fail ?")
+        st.title("Quels sont les risques de faillite de cette entreprise ?")
     # first run : initialization of st.session_state
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
