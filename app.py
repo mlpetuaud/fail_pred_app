@@ -15,7 +15,6 @@ st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="c
 
 # ---- CONTAINERS DECLARATION ----
 header_section = st.container()
-main_section = st.container()
 login_section = st.expander("SE CONNECTER")
 logout_section = st.sidebar.container()
 signup_section = st.expander("CREER UN COMPTE")

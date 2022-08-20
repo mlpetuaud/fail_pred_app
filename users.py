@@ -3,6 +3,8 @@ import get_env_variables
 import sqlalchemy
 import bcrypt
 
+"""This module is used to handle user authentification by interacting between Streamlit app input and PostgreSQL database
+"""
 
 def hash_password(password):
     """This function uses bcrypt to return a hashed password from the 
