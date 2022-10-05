@@ -20,7 +20,7 @@ def hash_password(password):
     hashed_password = bytes.decode(hashed_password)
     return hashed_password
     
-
+#https://realpython.com/prevent-python-sql-injection/#passing-safe-query-parameters
 def add_user(username, password):
     """This functions adds a new user to the database (users table):
         The password is hashed before persistance
@@ -31,9 +31,8 @@ def add_user(username, password):
     """
     hashed_password = hash_password(password)
     engine = sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
-    engine.execute(f"""INSERT INTO users (username, password) VALUES ('{username}', '{hashed_password}');""")
-    #engine.execute('INSERT INTO users(username, password) VALUES (?,?)', (username, hashed_password))
-# TODO : prevent from SQL Injection 
+    engine.execute('INSERT INTO users(username, password) VALUES (%s,%s)', (username, hashed_password))
+    
 
 
 def check_user_already_exists(username):
@@ -46,7 +45,7 @@ def check_user_already_exists(username):
         Bool: True if user already exists, else False
     """
     engine =  sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
-    result = engine.execute(f"SELECT username from users WHERE username = '{username}'")
+    result = engine.execute("SELECT username from users WHERE username = %s", (username, ))
     result_list = [r[0] for r in result]
     result = (len(result_list) != 0)
     return result
@@ -68,16 +67,16 @@ def check_password(username, password):
     """
     engine = sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
     # retrieve db password
-    result = engine.execute(f"SELECT password from users WHERE username = '{username}'")
+    result = engine.execute("SELECT password from users WHERE username = %s", (username, ))
     try:
         result_list = [r[0] for r in result]
         db_password = str.encode(result_list[0])
         # compare input password to db password
         check = bcrypt.checkpw(str.encode(password), db_password)
+        print(check)
         return check
     except:
         return False
-
 
 
 
