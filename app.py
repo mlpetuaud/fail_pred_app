@@ -26,43 +26,44 @@ def show_prediction_page():
             - API call
             - prediction output
     """
-    #prediction input
-    st.header("SELECTIONNEZ UNE ENTREPRISE :")
-    with st.form(key="input form"):
-            company = st.selectbox(
-                'Quelle entreprise ?', 
-                ("La Dolce Data", "Walking Bread", "World Company", "Tech tonique"))
-            submitted = st.form_submit_button("Soumettre")
+    #prediction input & data display
+    col1, col2 = st.columns([2,5])
+    with col1:
+        st.subheader("Sélectionnez une entreprise:")
+        choice = st.radio("",["La Dolce Data", "Walking Bread", "World Company", "Tech tonique"])
+        with st.form(key="input form"):
+            #choice = st.radio("Sélectionnez une entreprise", ["La Dolce Data", "Walking Bread", "World Company", "Tech tonique"])
+            submitted = st.form_submit_button("Calculer le risque de faillite")
+     
+    with col2:
+        st.subheader("Données détaillées :")
+        # load json file holding features for relevant company
+        data = json.load(open("data.json"))
+        df = prepare_input(data[choice])
+        df = df.rename(columns={0:choice})
+        st.write(df)
+
+
 
     #prediction output
     with st.container():
         if submitted:
-            # load json file holding features for each choice
-            data = json.load(open("data.json"))
-
-            # create 2 tabs to display results
-            tab1, tab2 = st.tabs([" 🔮 Prédiction", " 📓 Données détaillées"])
-
-            # tab1 holds prediction
-            with tab1:
-                payload_2 = data[company]
-                headers = {"Content-Type": "application/json", "Accept": "application/json"}
-                response = requests.post(get_env_variables.API_URL, headers=headers, json=payload_2)
-                result = response.json()
-                if result['pred'] == 'wont fail':
-                    st.header("Prédiction : PROSPERITE")
-                    st.image("001-yes.png", width=80)
-                    st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
-                else:
-                    st.header("Prédiction : FAILLITE")
-                    st.image("003-no.png", width=80)
-                    st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
-            # tab2 displays the input data
-            with tab2:
-                st.header("Données détaillées")
-                df = prepare_input(data[company])
-                df = df.rename(columns={0:company})
-                st.write(df)
+            # declare input to be given in API request body
+            payload_2 = data[choice]
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
+            # send request to API
+            response = requests.post(get_env_variables.API_URL, headers=headers, json=payload_2)
+            # retrieve and display result according to prediction class
+            result = response.json()
+            if result['pred'] == 'wont fail':
+                st.header("Prédiction : PROSPERITE")
+                st.image("001-yes.png", width=80)
+                st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
+            else:
+                st.header("Prédiction : FAILLITE")
+                st.image("003-no.png", width=80)
+                st.caption(f"probabilité de faillite : {round(result['failure_proba']*100, 2)}%")
+            
 
 
 # ---- USER AUTHENTIFICATION ----

@@ -45,7 +45,7 @@ def check_user_already_exists(username):
         Bool: True if user already exists, else False
     """
     engine =  sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
-    result = engine.execute("SELECT username from users WHERE username = %s", (username, ))
+    result = engine.execute("SELECT username from users WHERE username = %s", (username))
     result_list = [r[0] for r in result]
     result = (len(result_list) != 0)
     return result
@@ -67,13 +67,12 @@ def check_password(username, password):
     """
     engine = sqlalchemy.create_engine(get_env_variables.DATABASE_URI, echo=True)
     # retrieve db password
-    result = engine.execute("SELECT password from users WHERE username = %s", (username, ))
+    result = engine.execute("SELECT password from users WHERE username = %s", (username))
     try:
         result_list = [r[0] for r in result]
         db_password = str.encode(result_list[0])
         # compare input password to db password
         check = bcrypt.checkpw(str.encode(password), db_password)
-        print(check)
         return check
     except:
         return False
