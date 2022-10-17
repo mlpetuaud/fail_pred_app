@@ -16,7 +16,6 @@ st.set_page_config(page_title="Fail predict", page_icon="crash-1.jpg", layout="c
 # ---- CONTAINERS DECLARATION ----
 header_section = st.container()
 login_section = st.expander("SE CONNECTER")
-logout_section = st.sidebar.container()
 signup_section = st.expander("CREER UN COMPTE")
 
 # ---- PREDICTION ----
@@ -42,8 +41,6 @@ def show_prediction_page():
         df = prepare_input(data[choice])
         df = df.rename(columns={0:choice})
         st.write(df)
-
-
 
     #prediction output
     with st.container():
@@ -76,8 +73,9 @@ def logged_out_clicked():
 def show_logout_page():
     """This function shows the logout section in the sidebar
     """
-    with logout_section:
-        if st.session_state['username']:
+    logout_section = st.sidebar.container()
+    if 'username' in st.session_state:
+        with logout_section:
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.image("005-user.png")
@@ -85,11 +83,11 @@ def show_logout_page():
                 st.subheader(f"Connecté en tant que {st.session_state['username']}")
             with col3:
                 st.write("")
-        col4, col5, col6 = st.columns(3)
-        with col4:
-            st.write("")
-        with col5:
-            st.button("Se déconnecter", key="logout", on_click=logged_out_clicked)
+            col4, col5, col6 = st.columns(3)
+            with col4:
+                st.write("")
+            with col5:
+                st.button("Se déconnecter", key="logout", on_click=logged_out_clicked)
         
 def logged_in_clicked(username, password):
     """This function uses the users module to check if password 
@@ -139,13 +137,14 @@ def show_authentification_page():
         if st.session_state['logged_in'] == False:
             st.subheader("Se connecter")
             username_login = st.text_input("Utilisateur", key="user_login", value="")
-            password_login = st.text_input("Mot de passe", type="password", value="")
+            password_login = st.text_input("Mot de passe", key="password_login", type="password", value="")
             st.button("Connexion", on_click=logged_in_clicked, args= (username_login, password_login))
+
     with signup_section:
         if st.session_state['logged_in'] == False:
             st.subheader("Créer un compte")
-            username_signup = st.text_input("Choisir un nom d'utilisateur", key="user_signup", value="")
-            password_signup = st.text_input("Choisir un mot de passe", type="password", value="")
+            username_signup = st.text_input("Choisir un nom d'utilisateur", key="username_signup", value="")
+            password_signup = st.text_input("Choisir un mot de passe", key="password_signup", type="password", value="")
             st.button("Nouveau compte", on_click=signup_clicked, args=(username_signup, password_signup))
 
 
